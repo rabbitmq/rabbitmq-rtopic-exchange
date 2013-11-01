@@ -1,0 +1,7 @@
+{application, rabbitmq_rtopic_exchange,
+ [{description, "Reverse Topic Exchange Type"},
+  {vsn, "%%VSN%%"},
+  {modules, []},
+  {registered, []},
+  {env, []},
+  {applications, [rabbit]}]}.
