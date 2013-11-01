@@ -253,7 +253,7 @@ trie_children(X, Node) ->
                                   node_id       = Node,
                                   _             = '_'},
            node_id = '$1'},
-    mnesia:dirty_select(rabbit_rtopic_trie_edge, [{MatchHead, [], ['$1']}]).
+    mnesia:select(rabbit_rtopic_trie_edge, [{MatchHead, [], ['$1']}]).
 
 trie_bindings(X, Node) ->
     MatchHead = #rtopic_trie_binding{
