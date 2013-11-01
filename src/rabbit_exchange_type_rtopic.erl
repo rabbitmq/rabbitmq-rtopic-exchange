@@ -262,18 +262,40 @@ trie_bindings(X, Node) ->
                                    destination   = '$1'}},
     mnesia:select(rabbit_rtopic_trie_binding, [{MatchHead, [], ['$1']}]).
 
-trie_update_node_size(X, Node, Length) ->
-    E = case mnesia:read(rabbit_rtopic_trie_node,
-                         #rtrie_node{exchange_name = X,
-                                    node_id       = Node}, write) of
-            []   -> #rtopic_trie_node{trie_node = #rtrie_node{
-                                       exchange_name = X,
-                                       node_id       = Node},
-                                     edge_count    = 0,
-                                     binding_count = 0,
-                                     size          = ?DEFAULT_SIZE};
-            [E0] -> E0
-        end,
+read_trie_node(X, Node) ->
+    case mnesia:read(rabbit_rtopic_trie_node,
+                     #rtrie_node{exchange_name = X,
+                                 node_id       = Node}, write) of
+        []   -> #rtopic_trie_node{trie_node = #rtrie_node{
+                                  exchange_name = X,
+                                  node_id       = Node},
+                                 edge_count    = 0,
+                                 binding_count = 0,
+                                 size          = ?DEFAULT_SIZE};
+        [E0] -> E0
+    end.
+
+trie_update_ancestors_size(X, Node, Delta) ->
+    case trie_parent(X, Node) of
+        error -> 
+            ok;
+        Parent ->
+            case trie_children(X, Parent) of
+                [] ->
+                    %% no children in Parent so size has to be updated
+                    trie_update_node_size(X, Parent, Delta),
+                    trie_update_ancestors_size(X, Parent, Delta);
+                [#rtopic_trie_edge{node_id = Node}] ->
+                    %% only children is Node so size has to be updated on parent as well
+                    trie_update_node_size(X, Parent, Delta),
+                    trie_update_ancestors_size(X, Parent, Delta);
+                _ ->
+                    ok
+            end
+    end.
+
+trie_set_node_size(X, Node, Length) ->
+    E = read_trie_node(X, Node),
     case Length > E#rtopic_trie_node.size of
         false -> ok;
         true  -> 
@@ -281,28 +303,25 @@ trie_update_node_size(X, Node, Length) ->
             ok = mnesia:write(rabbit_rtopic_trie_node, EN, write)
     end.
 
+trie_update_node_size(X, Node, Delta) ->
+    E = read_trie_node(X, Node),
+    Field = #rtopic_trie_node.size,
+    E2 = setelement(Field, E, element(Field, E) + Delta),
+    ok = mnesia:write(rabbit_rtopic_trie_node, E2, write).
+
 trie_update_node_counts(X, Node, Field, Delta) ->
-    E = case mnesia:read(rabbit_rtopic_trie_node,
-                         #rtrie_node{exchange_name = X,
-                                    node_id       = Node}, write) of
-            []   -> #rtopic_trie_node{trie_node = #rtrie_node{
-                                       exchange_name = X,
-                                       node_id       = Node},
-                                     edge_count    = 0,
-                                     binding_count = 0,
-                                     size          = ?DEFAULT_SIZE};
-            [E0] -> E0
-        end,
+    E = read_trie_node(X, Node),
     case setelement(Field, E, element(Field, E) + Delta) of
         #rtopic_trie_node{edge_count = 0, binding_count = 0} ->
-            ok = mnesia:delete_object(rabbit_rtopic_trie_node, E, write);
+            ok = mnesia:delete_object(rabbit_rtopic_trie_node, E, write),
+            trie_update_ancestors_size(X, Node, -1);
         EN ->
             ok = mnesia:write(rabbit_rtopic_trie_node, EN, write)
     end.
 
 trie_add_edge(X, FromNode, ToNode, W, Length) ->
     trie_update_node_counts(X, FromNode, #rtopic_trie_node.edge_count, +1),
-    trie_update_node_size(X, FromNode, Length),
+    trie_set_node_size(X, FromNode, Length),
     trie_edge_op(X, FromNode, ToNode, W, fun mnesia:write/3).
 
 trie_remove_edge(X, FromNode, ToNode, W) ->
