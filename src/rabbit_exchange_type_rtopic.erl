@@ -260,7 +260,7 @@ trie_bindings(X, Node) ->
       trie_binding = #rtrie_binding{exchange_name = X,
                                    node_id       = Node,
                                    destination   = '$1'}},
-    mnesia:dirty_select(rabbit_rtopic_trie_binding, [{MatchHead, [], ['$1']}]).
+    mnesia:select(rabbit_rtopic_trie_binding, [{MatchHead, [], ['$1']}]).
 
 trie_update_node_size(X, Node, Length) ->
     E = case mnesia:read(rabbit_rtopic_trie_node,
