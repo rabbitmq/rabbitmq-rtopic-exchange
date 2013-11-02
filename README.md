@@ -2,7 +2,7 @@
 
 This plugin adds a __reverse topic exchange type__ to [RabbitMQ](http://www.rabbitmq.com).
 
-The idea is to be able to specify routing patterns when publishing messages, instead of when binding queues to exchanges (as opposed to what the topic exchange does).
+The idea is to be able to specify routing patterns when publishing messages. With the default topic exchange patterns are only accepted when binding queues to exchanges.
 
 With this plugin you can decide which queues receive the message at publishing time. With the default topic exchange the decision is made during queue binding.
 
