@@ -70,7 +70,7 @@ rabbit_common-0.0.0.ez
 rabbitmq_rtopic_exchange-0.0.0.ez
 ```
 
-Copy them all except `rabbit_common-*.ez` into your broker plugins folder. Then enable the plugin by using the `rabbitmq-plugins` script.
+Copy them all into your broker plugins folder except for `rabbit_common-*.ez`. Then enable the plugin by using the `rabbitmq-plugins` script.
 
 ## Examples and Tests ##
 
