@@ -22,7 +22,8 @@
 %% deal here.
 
 test() ->
-    routing_tests().
+    routing_tests(),
+    unbind_tests().
 
 routing_tests() ->
     ok = test0(t1()),
@@ -30,7 +31,8 @@ routing_tests() ->
     ok = test0(t3()),
     ok = test0(t4()),
     ok = test0(t5()),
-    ok = test0(t6()).
+    ok = test0(t6()),
+    ok = test0(t7()).
 
 t1() ->
     {[<<"a0.b0.c0.d0">>, <<"a1.b1.c1.d1">>], [<<"a0.b0.c0.d0">>], 1}.
@@ -59,6 +61,11 @@ t5() ->
 t6() ->
     {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c0.d0">>, <<"a3.b2.c0.d0">>], 
     [<<"#.c0.*">>], 
+    4}.
+
+t7() ->
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>, <<"a0.b0.c0">>], 
+    [<<"#">>], 
     4}.
 
 test0({Queues, Publishes, Count}) ->
@@ -94,9 +101,82 @@ test0({Queues, Publishes, Count}) ->
                                                            exclusive = true }),
              M
          end || Q <- Queues],
-    Count = lists:sum(Counts), %% All messages got routed
+    Count = lists:sum(Counts),
     amqp_channel:call(Chan, #'exchange.delete' { exchange = <<"rtopic">> }),
     [amqp_channel:call(Chan, #'queue.delete' { queue = Q }) || Q <- Queues],
     amqp_channel:close(Chan),
     amqp_connection:close(Conn),
     ok.
+
+unbind_tests() ->
+    ok = test1(u1()),
+    ok = test1(u2()),
+    ok = test1(u3()).
+
+u1() ->
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>, <<"a0.b0.c0">>], 
+    [<<"#">>], 
+    [<<"a0.b0.c0.d2">>],
+    3}.
+
+u2() ->
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>, <<"a0.b0.c0">>,
+      <<"a0.b1.c0.d0">>, <<"a0.b1.c0.d1">>, <<"a0.b1.c1.d2">>, <<"a0.b1.c1.d0">>
+     ], 
+    [<<"#.d0">>], 
+    [<<"a0.b1.c1.d0">>],
+    2}.
+
+u3() ->
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>, <<"a0.b0.c0">>,
+      <<"a0.b1.c0.d0">>, <<"a0.b1.c0.d1">>, <<"a0.b1.c1.d2">>, <<"a0.b1.c1.d0">>
+     ], 
+    [<<"#.c1.*">>], 
+    [<<"a0.b1.c1.d0">>],
+    1}.
+
+test1({Queues, Publishes, Unbinds, Count}) ->
+    Msg = #amqp_msg{props = #'P_basic'{}, payload = <<>>},
+    {ok, Conn} = amqp_connection:start(#amqp_params_network{}),
+    {ok, Chan} = amqp_connection:open_channel(Conn),
+    #'exchange.declare_ok'{} =
+        amqp_channel:call(Chan,
+                          #'exchange.declare' {
+                            exchange = <<"rtopic">>,
+                            type = <<"x-rtopic">>,
+                            auto_delete = true
+                           }),
+    [#'queue.declare_ok'{} =
+         amqp_channel:call(Chan, #'queue.declare' {
+                             queue = Q, exclusive = true }) || Q <- Queues],
+    [#'queue.bind_ok'{} =
+         amqp_channel:call(Chan, #'queue.bind' { queue = Q,
+                                                 exchange = <<"rtopic">>,
+                                                 routing_key = Q })
+     || Q <- Queues],
+
+    [#'queue.unbind_ok'{} =
+         amqp_channel:call(Chan, #'queue.unbind' { queue = U,
+                                                 exchange = <<"rtopic">>,
+                                                 routing_key = U })
+     || U <- Unbinds],
+
+    #'tx.select_ok'{} = amqp_channel:call(Chan, #'tx.select'{}),
+    [amqp_channel:call(Chan, #'basic.publish'{
+                        exchange = <<"rtopic">>, routing_key = RK},
+                       Msg) || RK <- Publishes],
+    amqp_channel:call(Chan, #'tx.commit'{}),
+     
+    Counts =
+        [begin
+            #'queue.declare_ok'{message_count = M} =
+                 amqp_channel:call(Chan, #'queue.declare' {queue     = Q,
+                                                           exclusive = true }),
+             M
+         end || Q <- Queues],
+    Count = lists:sum(Counts),
+    amqp_channel:call(Chan, #'exchange.delete' { exchange = <<"rtopic">> }),
+    [amqp_channel:call(Chan, #'queue.delete' { queue = Q }) || Q <- Queues],
+    amqp_channel:close(Chan),
+    amqp_connection:close(Conn),
+    ok.    
