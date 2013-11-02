@@ -22,12 +22,46 @@
 %% deal here.
 
 test() ->
-    Qs = [<<"a0.b0.c0.d0">>, <<"a1.b1.c1.d1">>],
-    Publishes = [<<"a0.b0.c0.d0">>],
-    Count = 1,
-    ok = test0(Qs, Publishes, Count).
+    routing_tests().
 
-test0(Queues, Publishes, Count) ->
+routing_tests() ->
+    ok = test0(t1()),
+    ok = test0(t2()),
+    ok = test0(t3()),
+    ok = test0(t4()),
+    ok = test0(t5()),
+    ok = test0(t6()).
+
+t1() ->
+    {[<<"a0.b0.c0.d0">>, <<"a1.b1.c1.d1">>], [<<"a0.b0.c0.d0">>], 1}.
+
+t2() ->
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>], 
+    [<<"a0.b0.c0.*">>], 
+    3}.
+    
+    
+t3() ->
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>], 
+    [<<"#">>], 
+    3}.
+    
+t4() ->
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c0.d0">>], 
+    [<<"#.d0">>], 
+    2}.
+    
+t5() ->
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c0.d0">>, <<"a3.b2.c0.d0">>], 
+    [<<"#.c0.d0">>], 
+    3}.
+    
+t6() ->
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c0.d0">>, <<"a3.b2.c0.d0">>], 
+    [<<"#.c0.*">>], 
+    4}.
+
+test0({Queues, Publishes, Count}) ->
     Msg = #amqp_msg{props = #'P_basic'{}, payload = <<>>},
     {ok, Conn} = amqp_connection:start(#amqp_params_network{}),
     {ok, Chan} = amqp_connection:open_channel(Conn),
