@@ -7,7 +7,7 @@ The idea is to be able to specify routing patterns when publishing messages. Wit
 With this plugin you can decide which queues receive the message at publishing time. With the default topic exchange the decision is made during queue binding.
 
 With this exchange your routing keys will be words separated by dots, and the routing keys will be words separated by dots as well, with the difference that you can
-provide special characters like the `#` or the `*`. The hash will match zero or more words. The start will match one words.
+provide special characters like the `#` or the `*`. The hash `#` will match zero or more words. The star `*` will match one words.
 
 ## Usage ##
 
