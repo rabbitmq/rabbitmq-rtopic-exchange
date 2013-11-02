@@ -31,8 +31,6 @@
          remove_bindings/3, assert_args_equivalence/2]).
 -export([init/0]).
 
--export([test_trie_bindings/2]).
-
 -rabbit_boot_step({?MODULE,
                    [{description, "exchange type rtopic"},
                     {mfa,         {rabbit_registry, register,
@@ -58,9 +56,6 @@
 -define(DEFAULT_SIZE, 0).
 
 %%----------------------------------------------------------------------------
-
-test_trie_bindings(X, Node) ->
-    trie_bindings(#resource{virtual_host = <<"/">>, name = X, kind = exchange}, Node).
 
 description() ->
     [{description, <<"AMQP reverse topic exchange">>}].
@@ -282,11 +277,11 @@ trie_update_ancestors_size(X, Node, Delta) ->
         Parent ->
             case trie_children(X, Parent) of
                 [] ->
-                    %% no children in Parent so size has to be updated
+                    %% Parent has no children, size has to be updated
                     trie_update_node_size(X, Parent, Delta),
                     trie_update_ancestors_size(X, Parent, Delta);
                 [#rtopic_trie_edge{node_id = Node}] ->
-                    %% only children is Node so size has to be updated on parent as well
+                    %% only children is Node, size has to be updated on parent as well
                     trie_update_node_size(X, Parent, Delta),
                     trie_update_ancestors_size(X, Parent, Delta);
                 _ ->
