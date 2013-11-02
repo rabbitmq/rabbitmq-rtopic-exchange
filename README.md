@@ -9,6 +9,8 @@ With this plugin you can decide which queues receive the message at publishing t
 With this exchange your routing keys will be words separated by dots, and the routing keys will be words separated by dots as well, with the difference that you can
 provide special characters like the `#` or the `*`. The hash will match zero or more words. The start will match one words.
 
+## Usage ##
+
 If we have the following setup, (we assume the exchange is of type _rtopic_):
 
 - Queue _A_ bound to exchange _rtopic_ with routing key `"server1.app1.mod1.info"`.
