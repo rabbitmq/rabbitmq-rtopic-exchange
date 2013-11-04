@@ -18,9 +18,6 @@
 -export([test/0]).
 -include_lib("amqp_client/include/amqp_client.hrl").
 
-%% Because the routing is probabilistic, we can't really test a great
-%% deal here.
-
 test() ->
     routing_tests(),
     unbind_tests().
