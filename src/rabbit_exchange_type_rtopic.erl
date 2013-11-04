@@ -158,10 +158,13 @@ collect_down_bindings(X, Node, ResAcc) ->
     end.
 
 collect_with_hash(X, Node, RestW, ResAcc) ->
-    case node_size(X, Node) >= length(RestW) of
+    collect_with_hash(X, Node, RestW, length(RestW), ResAcc).
+
+collect_with_hash(X, Node, RestW, LenW, ResAcc) ->
+    case node_size(X, Node) >= LenW of
         true ->
             lists:foldl(fun (Child, Acc) ->
-                            collect_with_hash(X, Child, RestW, Acc)
+                            collect_with_hash(X, Child, RestW, LenW, Acc)
                         end, ResAcc, trie_children(X, Node));
         _    ->
             case trie_parent(X, Node) of
