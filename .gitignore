@@ -1,3 +1,5 @@
 build
 dist
 ebin
+cover
+erl_crash.dump
