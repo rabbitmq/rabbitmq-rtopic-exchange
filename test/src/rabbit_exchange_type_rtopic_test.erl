@@ -29,7 +29,8 @@ routing_tests() ->
     ok = test0(t4()),
     ok = test0(t5()),
     ok = test0(t6()),
-    ok = test0(t7()).
+    ok = test0(t7()),
+    ok = test0(t8()).
 
 t1() ->
     {[<<"a0.b0.c0.d0">>, <<"a1.b1.c1.d1">>], [<<"a0.b0.c0.d0">>], 1}.
@@ -64,6 +65,11 @@ t7() ->
     {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>, <<"a0.b0.c0">>], 
     [<<"#">>], 
     4}.
+
+t8() ->
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>, <<"a0.b0.c0">>], 
+    [<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d0.e0">>], 
+    1}.
 
 test0({Queues, Publishes, Count}) ->
     Msg = #amqp_msg{props = #'P_basic'{}, payload = <<>>},
