@@ -167,7 +167,7 @@ collect_with_hash(X, Node, RestW, LenW, ResAcc) ->
                             collect_with_hash(X, Child, RestW, LenW, Acc)
                         end, ResAcc, trie_children(X, Node));
         _    ->
-            case trie_parent(X, Node) of
+            case trie_node_parent(Node) of
                 error -> ResAcc;
                 Parent -> trie_match(X, Parent, RestW, ResAcc)
             end
@@ -224,15 +224,12 @@ node_size(X, Node) ->
         _  -> ?DEFAULT_SIZE
     end.
 
-trie_parent(X, Node) ->
-    Pattern =
-        #rtopic_trie_edge{
-           trie_edge = #rtrie_edge{exchange_name = X,
-                                  _             = '_'},
-           node_id = Node},
-    case mnesia:dirty_match_object(rabbit_rtopic_trie_edge, Pattern) of
-        [#rtopic_trie_edge{trie_edge = #rtrie_edge{node_id = Parent}}] -> Parent;
-        _ -> error
+trie_node_parent(Node) ->
+    case mnesia:dirty_index_read(rabbit_rtopic_trie_edge, Node, #rtopic_trie_edge.node_id) of
+        [#rtopic_trie_edge{trie_edge = #rtrie_edge{node_id = Parent}}] 
+            -> Parent;
+        _ 
+            -> error
     end.
 
 trie_child(X, Node, Word) ->
@@ -241,7 +238,7 @@ trie_child(X, Node, Word) ->
                                  node_id       = Node,
                                  word          = Word}}) of
         [#rtopic_trie_edge{node_id = NextNode}] -> {ok, NextNode};
-        []                                     -> error
+        []                                      -> error
     end.
 
 trie_children(X, Node) ->
@@ -274,7 +271,7 @@ read_trie_node(X, Node) ->
     end.
 
 trie_update_ancestors_size(X, Node, Delta) ->
-    case trie_parent(X, Node) of
+    case trie_node_parent(Node) of
         error -> 
             ok;
         Parent ->
@@ -400,7 +397,8 @@ init() ->
     {rabbit_rtopic_trie_edge,
      [{record_name, rtopic_trie_edge},
       {attributes, record_info(fields, rtopic_trie_edge)},
-      {type, ordered_set}]},
+      {type, ordered_set},
+      {index, [#rtopic_trie_edge.node_id]}]},
     {rabbit_rtopic_trie_binding,
      [{record_name, rtopic_trie_binding},
       {attributes, record_info(fields, rtopic_trie_binding)},
