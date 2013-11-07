@@ -280,7 +280,7 @@ trie_update_ancestors_size(X, Node, Delta) ->
                     %% Parent has no children, size has to be updated
                     trie_update_node_size(X, Parent, Delta),
                     trie_update_ancestors_size(X, Parent, Delta);
-                [#rtopic_trie_edge{node_id = Node}] ->
+                [Node] ->
                     %% only children is Node, size has to be updated on parent as well
                     trie_update_node_size(X, Parent, Delta),
                     trie_update_ancestors_size(X, Parent, Delta);
