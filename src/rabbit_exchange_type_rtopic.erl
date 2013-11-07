@@ -161,7 +161,7 @@ collect_with_hash(X, Node, RestW, ResAcc) ->
     collect_with_hash(X, Node, RestW, length(RestW), ResAcc).
 
 collect_with_hash(X, Node, RestW, LenW, ResAcc) ->
-    case node_size(X, Node) >= LenW of
+    case trie_node_size(X, Node) >= LenW of
         true ->
             lists:foldl(fun (Child, Acc) ->
                             collect_with_hash(X, Child, RestW, LenW, Acc)
@@ -217,7 +217,7 @@ remove_path_if_empty(X, [{Node, W} | [{Parent, _} | _] = RestPath]) ->
         _  -> ok
     end.
 
-node_size(X, Node) ->
+trie_node_size(X, Node) ->
     case mnesia:read(rabbit_rtopic_trie_node,
                      #rtrie_node{exchange_name = X, node_id = Node}) of
         [#rtopic_trie_node{size = N}] -> N;
