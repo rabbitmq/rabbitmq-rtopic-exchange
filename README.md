@@ -51,6 +51,24 @@ The exchange type used when declaring an exchange is `x-rtopic`.
 
 ## Installing the plugin ##
 
+You can either choose one of the binary releases from the binaries folder, or build the plugin yourself. Keep in mind that the prebuilt binaries version must match your RabbitMQ version.
+
+### Prebuilt Binary ###
+
+Copy the appropriate binary version from the `binaries` folder into your broker plugins folder. For example:
+
+```bash
+cp binaries/rabbitmq_rtopic_exchange-v3.2.1.ez /path/to/rabbitmq_server-3.2.1/plugins/
+```
+
+Then enable the plugin:
+
+```bash
+./sbin/rabbitmq-plugins enable rabbitmq_rtopic_exchange
+```
+
+### Building the Plugin ###
+
 To build the exchange follow the instructions here [Plugin Development Guide](http://www.rabbitmq.com/plugin-development.html) to prepare the RabbitMQ Umbrella.
 
 Then clone this repository inside your umbrella folder and run make:
@@ -70,7 +88,11 @@ rabbit_common-0.0.0.ez
 rabbitmq_rtopic_exchange-0.0.0.ez
 ```
 
-Copy them all into your broker plugins folder except for `rabbit_common-*.ez`. Then enable the plugin by using the `rabbitmq-plugins` script.
+Copy them all into your broker plugins folder except for `rabbit_common-*.ez`. Then enable the plugin by using the `rabbitmq-plugins` script:
+
+```bash
+./sbin/rabbitmq-plugins enable rabbitmq_rtopic_exchange
+```
 
 ## Examples and Tests ##
 
