@@ -4,25 +4,40 @@
 
 -include_lib("amqp_client/include/amqp_client.hrl").
 
+-define(QUEUE_FILE, "/tmp/queues").
+-define(RKEYS_FILE, "/tmp/rkeys").
+-define(RAND_KEYS_FILE, "/tmp/rand_rkeys").
 
-test(NQs, QL) ->
-    Runs = [{{10, 5}, 1},
-            {{10, 5}, 10},
-            {{10, 5}, 100},
-            {{10, 5}, 1000},
-            {{10, 5}, 10000}],
-    
-    run(<<"rtopic">>, NQs, QL, Runs).
+prepare_test() ->
+    dump_queues(10000, 10),
+    dump_rand_rkeys(10000, 15).
 
-run(XBin, NQs, QLen, Runs) ->
-    prepare_bindings(XBin, NQs, QLen),
-    F = fun ({N, L}) -> route(XBin, N, L) end,
-    
+test() ->
+    Runs = [
+        {1, 1, 100},
+        {10, 10, 100},
+        {100, 10, 100},
+        {1000, 10, 100}
+    ],
+    test(Runs).
+
+test(Runs) ->
     [begin
-        Res = tcn(F, R, Reps),
-        delete_exchange(XBin),
-        Res
-     end || {R, Reps} <- Runs].
+        Res = run(NQs, NRKs, Reps),
+        {Res, R}
+     end || R = {NQs, NRKs, Reps}  <- Runs].
+
+run(NQs, NRKs, Reps) ->
+    X = <<"rtopic">>,
+    {ok, [Queues]} = file:consult(?QUEUE_FILE),
+    {ok, [RKeys]} = file:consult(?RAND_KEYS_FILE),
+    {Qs, _} = lists:split(NQs, Queues),
+    {Rs, _} = lists:split(NRKs, RKeys),
+    prepare_bindings0(X, Qs),
+    F = fun (Routes) -> route0(X, Routes) end,
+    Res = tcn(F, Rs, Reps),
+    delete_exchange(X),
+    Res.
 
 prepare_bindings(XBin, N, Length) ->
     Queues = queues(N, Length),
@@ -69,15 +84,15 @@ dump_rand_rkeys(N, Length) ->
 
 dump_to_file(N, Length, queues) ->
     Queues = queues(N, Length),
-    dump_to_file("/tmp/queues", Queues);
+    dump_to_file(?QUEUE_FILE, Queues);
 
 dump_to_file(N, Length, rkeys) ->
     RKeys = rkeys(N, Length),
-    dump_to_file("/tmp/rkeys", RKeys);
+    dump_to_file(?RKEYS_FILE, RKeys);
 
 dump_to_file(N, Length, rand_rkeys) ->
     RKeys = rkeys_rand_len(N, Length),
-    dump_to_file("/tmp/rand_rkeys", RKeys).
+    dump_to_file(?RAND_KEYS_FILE, RKeys).
 
 dump_to_file(F, Data) ->
     file:write_file(F, io_lib:fwrite("~p.\n", [Data])).
