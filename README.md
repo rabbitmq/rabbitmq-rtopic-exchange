@@ -121,11 +121,11 @@ a1.b0.c0.d0
 a1.b1.c0.d0
 ```
 
-If we publish a message with the following routing key: `a0.#`, it's the same as asking "find me all the routing keys that start with `a0`". After the algorithm descended on level in the trie, then it needs to visit every node in the trie. So the longer the prefix, the faster the routing will behave. That is, queries of the kind "find all string with prefix", will go faster, the longer the prefix is.
+If we publish a message with the following routing key: `"a0.#"`, it's the same as asking "find me all the routing keys that start with `"a0"`. After the algorithm descended on level in the trie, then it needs to visit every node in the trie. So the longer the prefix, the faster the routing will behave. That is, queries of the kind "find all string with prefix", will go faster, the longer the prefix is.
 
-On the other hand if we publish a message with the routing key `#.d0`, it's the same as asking "find me all the bindings with suffix `d0`". That would be terribly slow to do with a trie, but there's a trick. If you need to use this exchange for this kind of routing, then you can build your bindings in reverse, therefore you could do a "all prefixes" query instead of a "all suffixes" query.
+On the other hand if we publish a message with the routing key `"#.d0"`, it's the same as asking "find me all the bindings with suffix `"d0"`. That would be terribly slow to do with a trie, but there's a trick. If you need to use this exchange for this kind of routing, then you can build your bindings in reverse, therefore you could do a "all prefixes" query instead of a "all suffixes" query.
 
-If you have the needs for routing "a0.#.c0.d0.#.f0.#" then again, with a small amount of binding keys it should be a problem, but keep in mind that the longer the gaps represented by the `#` character, the slower the algorithm will run. AFAIK there's no easy solution for this problem.
+If you have the needs for routing `"a0.#.c0.d0.#.f0.#"` then again, with a small amount of binding keys it should be a problem, but keep in mind that the longer the gaps represented by the `#` character, the slower the algorithm will run. AFAIK there's no easy solution for this problem.
 
 ## License ##
 
