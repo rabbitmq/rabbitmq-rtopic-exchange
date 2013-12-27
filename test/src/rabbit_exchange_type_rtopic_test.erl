@@ -31,10 +31,14 @@ routing_tests() ->
     ok = test0(t6()),
     ok = test0(t7()),
     ok = test0(t8()),
-    ok = test0(t9()).
+    ok = test0(t9()),
+    ok = test0(t10()),
+    ok = test0(t11()).
 
 t1() ->
-    {[<<"a0.b0.c0.d0">>, <<"a1.b1.c1.d1">>], [<<"a0.b0.c0.d0">>], 1}.
+    {[<<"a0.b0.c0.d0">>, <<"a1.b1.c1.d1">>], %% binding keys
+    [<<"a0.b0.c0.d0">>], %% routing key
+    1}. %% expected matches
 
 t2() ->
     {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>], 
@@ -76,6 +80,16 @@ t9() ->
     {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c0.d0">>], 
     [<<"#.c0.d0">>], 
     2}.
+    
+t10() ->
+    {[<<"a0.b1.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c1.d0">>], 
+    [<<"a0.b1.#">>], 
+    2}.
+
+t11() ->
+    {[<<"a0.b1.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c1.d0">>], 
+    [<<"a0.b1.c0.d0.#">>],
+    1}.
 
 test0({Queues, Publishes, Count}) ->
     Msg = #amqp_msg{props = #'P_basic'{}, payload = <<>>},
