@@ -117,6 +117,9 @@ tcn2(F, Arg, N) ->
 queues(N, L) ->
     do_n(fun queue_name/1, L, N).
 
+rand_queues(N, L) ->
+    do_n(fun random_length_queue_name/1, L, N).
+
 rkeys(N, L) ->
     do_n(fun routing_key/1, L, N).
 
@@ -125,6 +128,10 @@ rkeys_rand_len(N, L) ->
 
 queue_name(L) ->
     list_to_binary(random_string(L, false)).
+
+random_length_queue_name(L) ->
+    L1 = random:uniform(L),
+    list_to_binary(random_string(L1, false)).
 
 routing_key(L) ->
     list_to_binary(random_string(L, true)).
