@@ -45,7 +45,7 @@
      {requires,    database},
      {enables,     external_infrastructure}]}).
 
--record(rtopic_trie_node, {trie_node, edge_count, binding_count, size}).
+-record(rtopic_trie_node, {trie_node, edge_count, binding_count}).
 -record(rtopic_trie_edge, {trie_edge, node_id}).
 -record(rtopic_trie_binding, {trie_binding, value = const}).
 
@@ -157,33 +157,24 @@ collect_down_bindings(X, Node, ResAcc) ->
               end, ResAcc, Children)
     end.
 
-collect_with_hash(X, Node, RestW, ResAcc) ->
-    collect_with_hash(X, Node, RestW, length(RestW), ResAcc).
-
-collect_with_hash(X, Node, RestW, LenW, ResAcc) ->
-    case trie_node_size(X, Node) >= LenW of
-        true ->
-            lists:foldl(fun (Child, Acc) ->
-                            collect_with_hash(X, Child, RestW, LenW, Acc)
-                        end, ResAcc, trie_children(X, Node));
-        _    ->
-            case trie_node_parent(Node) of
-                error -> ResAcc;
-                Parent -> trie_match(X, Parent, RestW, ResAcc)
-            end
-    end.
+collect_with_hash(X, Node, [W|_Tail] = RestW, ResAcc) ->
+    lists:foldl(fun ({Word, Child}, Acc) ->
+                    case Word of
+                        W -> collect_with_hash(X, Child, RestW, trie_match(X, Node, RestW, Acc));
+                        _ -> collect_with_hash(X, Child, RestW, Acc)
+                    end
+                end, ResAcc, trie_children2(X, Node)).
 
 follow_down_create(X, Words) ->
     case follow_down_last_node(X, Words) of
         {ok, FinalNode}      -> FinalNode;
         {error, Node, RestW} -> 
-            {N, _} = lists:foldl(
-                    fun (W, {CurNode, Length}) ->
-                        NewNode = new_node_id(),
-                        trie_add_edge(X, CurNode, NewNode, W, Length),
-                        {NewNode, Length-1}
-                    end, {Node, length(RestW)}, RestW),
-            N
+            lists:foldl(
+                fun (W, CurNode) ->
+                    NewNode = new_node_id(),
+                    trie_add_edge(X, CurNode, NewNode, W),
+                    NewNode
+                end, Node, RestW)
     end.
 
 follow_down_last_node(X, Words) ->
@@ -217,21 +208,6 @@ remove_path_if_empty(X, [{Node, W} | [{Parent, _} | _] = RestPath]) ->
         _  -> ok
     end.
 
-trie_node_size(X, Node) ->
-    case mnesia:read(rabbit_rtopic_trie_node,
-                     #rtrie_node{exchange_name = X, node_id = Node}) of
-        [#rtopic_trie_node{size = N}] -> N;
-        _  -> ?DEFAULT_SIZE
-    end.
-
-trie_node_parent(Node) ->
-    case mnesia:dirty_index_read(rabbit_rtopic_trie_edge, Node, #rtopic_trie_edge.node_id) of
-        [#rtopic_trie_edge{trie_edge = #rtrie_edge{node_id = Parent}}] 
-            -> Parent;
-        _ 
-            -> error
-    end.
-
 trie_child(X, Node, Word) ->
     case mnesia:read({rabbit_rtopic_trie_edge,
                       #rtrie_edge{exchange_name = X,
@@ -245,10 +221,19 @@ trie_children(X, Node) ->
     MatchHead =
         #rtopic_trie_edge{
            trie_edge = #rtrie_edge{exchange_name = X,
-                                  node_id       = Node,
-                                  _             = '_'},
+                                   node_id       = Node,
+                                   _             = '_'},
            node_id = '$1'},
     mnesia:select(rabbit_rtopic_trie_edge, [{MatchHead, [], ['$1']}]).
+
+trie_children2(X, Node) ->
+    MatchHead =
+        #rtopic_trie_edge{
+           trie_edge = #rtrie_edge{exchange_name = X,
+                                   node_id       = Node,
+                                   word          = '$1'},
+           node_id = '$2'},
+    mnesia:select(rabbit_rtopic_trie_edge, [{MatchHead, [], [{{'$1', '$2'}}]}]).
 
 trie_bindings(X, Node) ->
     MatchHead = #rtopic_trie_binding{
@@ -264,59 +249,22 @@ read_trie_node(X, Node) ->
         []   -> #rtopic_trie_node{trie_node = #rtrie_node{
                                   exchange_name = X,
                                   node_id       = Node},
-                                 edge_count    = 0,
-                                 binding_count = 0,
-                                 size          = ?DEFAULT_SIZE};
+                                  edge_count    = 0,
+                                  binding_count = 0};
         [E0] -> E0
     end.
-
-trie_update_ancestors_size(X, Node, Delta) ->
-    case trie_node_parent(Node) of
-        error -> 
-            ok;
-        Parent ->
-            case trie_children(X, Parent) of
-                [] ->
-                    %% Parent has no children, size has to be updated
-                    trie_update_node_size(X, Parent, Delta),
-                    trie_update_ancestors_size(X, Parent, Delta);
-                [Node] ->
-                    %% only children is Node, size has to be updated on parent as well
-                    trie_update_node_size(X, Parent, Delta),
-                    trie_update_ancestors_size(X, Parent, Delta);
-                _ ->
-                    ok
-            end
-    end.
-
-trie_set_node_size(X, Node, Length) ->
-    E = read_trie_node(X, Node),
-    case Length > E#rtopic_trie_node.size of
-        false -> ok;
-        true  -> 
-            EN = E#rtopic_trie_node{size = Length},
-            ok = mnesia:write(rabbit_rtopic_trie_node, EN, write)
-    end.
-
-trie_update_node_size(X, Node, Delta) ->
-    E = read_trie_node(X, Node),
-    Field = #rtopic_trie_node.size,
-    E2 = setelement(Field, E, element(Field, E) + Delta),
-    ok = mnesia:write(rabbit_rtopic_trie_node, E2, write).
 
 trie_update_node_counts(X, Node, Field, Delta) ->
     E = read_trie_node(X, Node),
     case setelement(Field, E, element(Field, E) + Delta) of
         #rtopic_trie_node{edge_count = 0, binding_count = 0} ->
-            ok = mnesia:delete_object(rabbit_rtopic_trie_node, E, write),
-            trie_update_ancestors_size(X, Node, -1);
+            ok = mnesia:delete_object(rabbit_rtopic_trie_node, E, write);
         EN ->
             ok = mnesia:write(rabbit_rtopic_trie_node, EN, write)
     end.
 
-trie_add_edge(X, FromNode, ToNode, W, Length) ->
+trie_add_edge(X, FromNode, ToNode, W) ->
     trie_update_node_counts(X, FromNode, #rtopic_trie_node.edge_count, +1),
-    trie_set_node_size(X, FromNode, Length),
     trie_edge_op(X, FromNode, ToNode, W, fun mnesia:write/3).
 
 trie_remove_edge(X, FromNode, ToNode, W) ->
@@ -326,8 +274,8 @@ trie_remove_edge(X, FromNode, ToNode, W) ->
 trie_edge_op(X, FromNode, ToNode, W, Op) ->
     ok = Op(rabbit_rtopic_trie_edge,
             #rtopic_trie_edge{trie_edge = #rtrie_edge{exchange_name = X,
-                                                    node_id       = FromNode,
-                                                    word          = W},
+                                                      node_id       = FromNode,
+                                                      word          = W},
                              node_id   = ToNode},
             write).
 
@@ -343,21 +291,21 @@ trie_binding_op(X, Node, D, Op) ->
     ok = Op(rabbit_rtopic_trie_binding,
             #rtopic_trie_binding{
               trie_binding = #rtrie_binding{exchange_name = X,
-                                           node_id       = Node,
-                                           destination   = D}},
+                                            node_id       = Node,
+                                            destination   = D}},
             write).
 
 trie_remove_all_nodes(X) ->
     remove_all(rabbit_rtopic_trie_node,
                #rtopic_trie_node{trie_node = #rtrie_node{exchange_name = X,
-                                                       _             = '_'},
-                                _         = '_'}).
+                                                       _               = '_'},
+                                 _         = '_'}).
 
 trie_remove_all_edges(X) ->
     remove_all(rabbit_rtopic_trie_edge,
                #rtopic_trie_edge{trie_edge = #rtrie_edge{exchange_name = X,
-                                                       _             = '_'},
-                                _         = '_'}).
+                                                       _               = '_'},
+                                 _         = '_'}).
 
 trie_remove_all_bindings(X) ->
     remove_all(rabbit_rtopic_trie_binding,
@@ -397,8 +345,7 @@ init() ->
     {rabbit_rtopic_trie_edge,
      [{record_name, rtopic_trie_edge},
       {attributes, record_info(fields, rtopic_trie_edge)},
-      {type, ordered_set},
-      {index, [#rtopic_trie_edge.node_id]}]},
+      {type, ordered_set}]},
     {rabbit_rtopic_trie_binding,
      [{record_name, rtopic_trie_binding},
       {attributes, record_info(fields, rtopic_trie_binding)},
