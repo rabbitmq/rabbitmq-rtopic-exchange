@@ -100,6 +100,33 @@ There's a few tests inside the test folder. You can take a look there if you wan
 
 To run the tests call `make test`.
 
+## Performance ##
+
+Internally the plugin uses a trie like data structure, so the following has to be taken into account when binding either queues or exchanges to it.
+
+The following applies if you have **thousands** of queues. After some benchmarks I could see that performance degraded for +1000 bindings. So if you have say, 100 bindings to this exchange, then performance should be acceptable in most cases. In any case, running your own benchmarks wont hurt. The file `rabbit_rtopic_perf.erl` has some precarious tools to run benchmarks that I ought to document at some point.
+
+A trie performs better when doing _prefix_ searches than _suffix_ searches. For example we have the following bindings:
+
+```
+a0.b0.c0.d0
+a0.b0.c1.d0
+a0.b1.c0.d0
+a0.b1.c1.d0
+a0.b0.c2.d1
+a0.b0.c2.d0
+a0.b0.c2.d1
+a0.b0.c3.d0
+a1.b0.c0.d0
+a1.b1.c0.d0
+```
+
+If we publish a message with the following routing key: `a0.#`, it's the same as asking "find me all the routing keys that start with `a0`". After the algorithm descended on level in the trie, then it needs to visit every node in the trie. So the longer the prefix, the faster the routing will behave. That is, queries of the kind "find all string with prefix", will go faster, the longer the prefix is.
+
+On the other hand if we publish a message with the routing key `#.d0`, it's the same as asking "find me all the bindings with suffix `d0`". That would be terribly slow to do with a trie, but there's a trick. If you need to use this exchange for this kind of routing, then you can build your bindings in reverse, therefore you could do a "all prefixes" query instead of a "all suffixes" query.
+
+If you have the needs for routing "a0.#.c0.d0.#.f0.#" then again, with a small amount of binding keys it should be a problem, but keep in mind that the longer the gaps represented by the `#` character, the slower the algorithm will run. AFAIK there's no easy solution for this problem.
+
 ## License ##
 
 See LICENSE.
