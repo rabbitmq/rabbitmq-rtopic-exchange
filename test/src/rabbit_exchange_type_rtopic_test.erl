@@ -8,7 +8,7 @@
 %% the License for the specific language governing rights and
 %% limitations under the License.
 %%
-%% The Original Code is RabbitMQ Consistent Hash Exchange.
+%% The Original Code is RabbitMQ Reverse Topic Exchange.
 %%
 %% The Initial Developer of the Original Code is GoPivotal, Inc.
 %% Copyright (c) 2011-2013 GoPivotal, Inc.  All rights reserved.
@@ -42,59 +42,59 @@ t1() ->
     1}. %% expected matches
 
 t2() ->
-    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>], 
-    [<<"a0.b0.c0.*">>], 
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>],
+    [<<"a0.b0.c0.*">>],
     3}.
-    
-    
+
+
 t3() ->
-    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>], 
-    [<<"#">>], 
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>],
+    [<<"#">>],
     3}.
-    
+
 t4() ->
-    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c0.d0">>], 
-    [<<"#.d0">>], 
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c0.d0">>],
+    [<<"#.d0">>],
     2}.
-    
+
 t5() ->
-    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c0.d0">>, <<"a3.b2.c0.d0">>], 
-    [<<"#.c0.d0">>], 
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c0.d0">>, <<"a3.b2.c0.d0">>],
+    [<<"#.c0.d0">>],
     3}.
-    
+
 t6() ->
-    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c0.d0">>, <<"a3.b2.c0.d0">>], 
-    [<<"#.c0.*">>], 
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c0.d0">>, <<"a3.b2.c0.d0">>],
+    [<<"#.c0.*">>],
     4}.
 
 t7() ->
-    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>, <<"a0.b0.c0">>], 
-    [<<"#">>], 
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>, <<"a0.b0.c0">>],
+    [<<"#">>],
     4}.
 
 t8() ->
-    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>, <<"a0.b0.c0">>], 
-    [<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d0.e0">>], 
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>, <<"a0.b0.c0">>],
+    [<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d0.e0">>],
     1}.
 
 t9() ->
-    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c0.d0">>], 
-    [<<"#.c0.d0">>], 
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c0.d0">>],
+    [<<"#.c0.d0">>],
     2}.
-    
+
 t10() ->
-    {[<<"a0.b1.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c1.d0">>], 
-    [<<"a0.b1.#">>], 
+    {[<<"a0.b1.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c1.d0">>],
+    [<<"a0.b1.#">>],
     2}.
 
 t11() ->
-    {[<<"a0.b1.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c1.d0">>], 
+    {[<<"a0.b1.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b1.c1.d0">>],
     [<<"a0.b1.c0.d0.#">>],
     1}.
 
 %% test based on a user bug report.
 t12() ->
-    {[<<"PDFConstructor.PDFEnhancer.PDFSpy.PSrip.-.-">>], 
+    {[<<"PDFConstructor.PDFEnhancer.PDFSpy.PSrip.-.-">>],
     [<<"*.*.*.*.*.pdfToolbox">>],
     0}.
 
@@ -117,13 +117,13 @@ test0({Queues, Publishes, Count}) ->
                                                  exchange = <<"rtopic">>,
                                                  routing_key = Q })
      || Q <- Queues],
-     
+
     #'tx.select_ok'{} = amqp_channel:call(Chan, #'tx.select'{}),
     [amqp_channel:call(Chan, #'basic.publish'{
                         exchange = <<"rtopic">>, routing_key = RK},
                        Msg) || RK <- Publishes],
     amqp_channel:call(Chan, #'tx.commit'{}),
-     
+
     Counts =
         [begin
             #'queue.declare_ok'{message_count = M} =
@@ -144,24 +144,24 @@ unbind_tests() ->
     ok = test1(u3()).
 
 u1() ->
-    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>, <<"a0.b0.c0">>], 
-    [<<"#">>], 
+    {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>, <<"a0.b0.c0">>],
+    [<<"#">>],
     [<<"a0.b0.c0.d2">>],
     3}.
 
 u2() ->
     {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>, <<"a0.b0.c0">>,
       <<"a0.b1.c0.d0">>, <<"a0.b1.c0.d1">>, <<"a0.b1.c1.d2">>, <<"a0.b1.c1.d0">>
-     ], 
-    [<<"#.d0">>], 
+     ],
+    [<<"#.d0">>],
     [<<"a0.b1.c1.d0">>],
     2}.
 
 u3() ->
     {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>, <<"a0.b0.c0">>,
       <<"a0.b1.c0.d0">>, <<"a0.b1.c0.d1">>, <<"a0.b1.c1.d2">>, <<"a0.b1.c1.d0">>
-     ], 
-    [<<"#.c1.*">>], 
+     ],
+    [<<"#.c1.*">>],
     [<<"a0.b1.c1.d0">>],
     1}.
 
@@ -196,7 +196,7 @@ test1({Queues, Publishes, Unbinds, Count}) ->
                         exchange = <<"rtopic">>, routing_key = RK},
                        Msg) || RK <- Publishes],
     amqp_channel:call(Chan, #'tx.commit'{}),
-     
+
     Counts =
         [begin
             #'queue.declare_ok'{message_count = M} =
@@ -209,4 +209,4 @@ test1({Queues, Publishes, Unbinds, Count}) ->
     [amqp_channel:call(Chan, #'queue.delete' { queue = Q }) || Q <- Queues],
     amqp_channel:close(Chan),
     amqp_connection:close(Conn),
-    ok.    
+    ok.
