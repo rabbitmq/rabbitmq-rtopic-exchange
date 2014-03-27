@@ -15,14 +15,16 @@
 %%
 
 -module(rabbit_exchange_type_rtopic_test).
+
 -export([test/0]).
+
+-include_lib("eunit/include/eunit.hrl").
 -include_lib("amqp_client/include/amqp_client.hrl").
 
 test() ->
-    routing_tests(),
-    unbind_tests().
+    ok = eunit:test(tests(?MODULE, 60), [verbose]).
 
-routing_tests() ->
+routing_test() ->
     ok = test0(t1()),
     ok = test0(t2()),
     ok = test0(t3()),
@@ -138,7 +140,7 @@ test0({Queues, Publishes, Count}) ->
     amqp_connection:close(Conn),
     ok.
 
-unbind_tests() ->
+unbind_test() ->
     ok = test1(u1()),
     ok = test1(u2()),
     ok = test1(u3()).
@@ -210,3 +212,10 @@ test1({Queues, Publishes, Unbinds, Count}) ->
     amqp_channel:close(Chan),
     amqp_connection:close(Conn),
     ok.
+
+
+tests(Module, Timeout) ->
+    {foreach, fun() -> ok end,
+     [{timeout, Timeout, fun Module:F/0} ||
+         {F, _Arity} <- proplists:get_value(exports, Module:module_info()),
+         string:right(atom_to_list(F), 5) =:= "_test"]}.
