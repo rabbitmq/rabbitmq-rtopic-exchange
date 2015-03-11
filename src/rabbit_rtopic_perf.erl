@@ -56,7 +56,7 @@ route0(XBin, RKeys) ->
     X = exchange(XBin),
     [begin
         Msg = rabbit_basic:message(XBin, RKey, Props, <<>>),
-        Delivery = rabbit_basic:delivery(false, Msg, undefined),
+        Delivery = rabbit_basic:delivery(false, false, Msg, undefined),
         rabbit_exchange_type_rtopic:route(X, Delivery)
      end || RKey <- RKeys].
 
@@ -98,20 +98,20 @@ dump_to_file(F, Data) ->
     file:write_file(F, io_lib:fwrite("~p.\n", [Data])).
 
 tc(F) ->
-    B = now(), 
-    F(), 
-    A = now(), 
+    B = now(),
+    F(),
+    A = now(),
     timer:now_diff(A,B).
 
-tcn(F, Arg, N) -> 
-    B = now(), 
-    tcn2(F, Arg, N), 
-    A = now(), 
+tcn(F, Arg, N) ->
+    B = now(),
+    tcn2(F, Arg, N),
+    A = now(),
     timer:now_diff(A,B)/N.
 
-tcn2(_F, _Arg, 0) -> ok; 
-tcn2(F, Arg, N) -> 
-    F(Arg), 
+tcn2(_F, _Arg, 0) -> ok;
+tcn2(F, Arg, N) ->
+    F(Arg),
     tcn2(F, Arg, N-1).
 
 queues(N, L) ->
