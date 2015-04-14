@@ -6,7 +6,7 @@ The idea is to be able to specify routing patterns when publishing messages. Wit
 
 With this plugin you can decide which queues receive the message at publishing time. With the default topic exchange the decision is made during queue binding.
 
-With this exchange your routing keys will be words separated by dots, and the binding keys will be words separated by dots as well, with the difference that on the routing keys 
+With this exchange your routing keys will be words separated by dots, and the binding keys will be words separated by dots as well, with the difference that on the routing keys
 you can provide special characters like the `#` or the `*`. The hash `#` will match zero or more words. The star `*` will match one word.
 
 ## Usage ##
@@ -51,15 +51,8 @@ The exchange type used when declaring an exchange is `x-rtopic`.
 
 ## Installing the plugin ##
 
-You can either choose one of the binary releases from the binaries folder, or build the plugin yourself. Keep in mind that the prebuilt binaries version must match your RabbitMQ version.
-
-### Prebuilt Binary ###
-
-Copy the appropriate binary version from the `binaries` folder into your broker plugins folder. For example:
-
-```bash
-cp binaries/rabbitmq_rtopic_exchange-v3.2.1.ez /path/to/rabbitmq_server-3.2.1/plugins/
-```
+Install the corresponding .ez files from our
+[Community Plugins page](http://www.rabbitmq.com/community-plugins.html).
 
 Then enable the plugin:
 
