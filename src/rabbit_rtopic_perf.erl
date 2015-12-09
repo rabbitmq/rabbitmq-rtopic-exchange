@@ -97,17 +97,9 @@ dump_to_file(N, Length, rand_rkeys) ->
 dump_to_file(F, Data) ->
     file:write_file(F, io_lib:fwrite("~p.\n", [Data])).
 
-tc(F) ->
-    B = now(),
-    F(),
-    A = now(),
-    timer:now_diff(A,B).
-
 tcn(F, Arg, N) ->
-    B = now(),
-    tcn2(F, Arg, N),
-    A = now(),
-    timer:now_diff(A,B)/N.
+    {Time, _Val} = timer:tc(fun tcn2/3, [F, Arg, N]),
+    Time/N.
 
 tcn2(_F, _Arg, 0) -> ok;
 tcn2(F, Arg, N) ->
