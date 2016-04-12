@@ -30,6 +30,7 @@
          create/2, delete/3, policy_changed/2, add_binding/3,
          remove_bindings/3, assert_args_equivalence/2]).
 -export([init/0]).
+-export([info/1, info/2]).
 
 -rabbit_boot_step({?MODULE,
                    [{description, "exchange type rtopic"},
@@ -56,6 +57,9 @@
 -define(DEFAULT_SIZE, 0).
 
 %%----------------------------------------------------------------------------
+
+info(_X) -> [].
+info(_X, _) -> [].
 
 description() ->
     [{description, <<"AMQP reverse topic exchange">>}].
