@@ -14,29 +14,76 @@
 %% Copyright (c) 2011-2013 GoPivotal, Inc.  All rights reserved.
 %%
 
--module(rabbit_exchange_type_rtopic_test).
+-module(rabbit_exchange_type_rtopic_SUITE).
 
--export([test/0]).
+-compile(export_all).
 
+-include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("amqp_client/include/amqp_client.hrl").
 
-test() ->
-    ok = eunit:test(tests(?MODULE, 60), [verbose]).
+all() ->
+    [
+      {group, non_parallel_tests}
+    ].
 
-routing_test() ->
-    ok = test0(t1()),
-    ok = test0(t2()),
-    ok = test0(t3()),
-    ok = test0(t4()),
-    ok = test0(t5()),
-    ok = test0(t6()),
-    ok = test0(t7()),
-    ok = test0(t8()),
-    ok = test0(t9()),
-    ok = test0(t10()),
-    ok = test0(t11()),
-    ok = test0(t12()).
+groups() ->
+    [
+      {non_parallel_tests, [], [
+                                routing_test,
+                                unbind_test
+                               ]}
+    ].
+
+%% -------------------------------------------------------------------
+%% Testsuite setup/teardown.
+%% -------------------------------------------------------------------
+
+init_per_suite(Config) ->
+    rabbit_ct_helpers:log_environment(),
+    Config1 = rabbit_ct_helpers:set_config(Config, [
+        {rmq_nodename_suffix, ?MODULE}
+      ]),
+    rabbit_ct_helpers:run_setup_steps(Config1,
+      rabbit_ct_broker_helpers:setup_steps() ++
+      rabbit_ct_client_helpers:setup_steps()).
+
+end_per_suite(Config) ->
+    rabbit_ct_helpers:run_teardown_steps(Config,
+      rabbit_ct_client_helpers:teardown_steps() ++
+      rabbit_ct_broker_helpers:teardown_steps()).
+
+init_per_group(_, Config) ->
+    Config.
+
+end_per_group(_, Config) ->
+    Config.
+
+init_per_testcase(Testcase, Config) ->
+    rabbit_ct_helpers:testcase_started(Config, Testcase).
+
+end_per_testcase(Testcase, Config) ->
+    rabbit_ct_helpers:testcase_finished(Config, Testcase).
+
+%% -------------------------------------------------------------------
+%% Testcases.
+%% -------------------------------------------------------------------
+
+routing_test(Config) ->
+    ok = routing_test0(Config, t1()),
+    ok = routing_test0(Config, t2()),
+    ok = routing_test0(Config, t3()),
+    ok = routing_test0(Config, t4()),
+    ok = routing_test0(Config, t5()),
+    ok = routing_test0(Config, t6()),
+    ok = routing_test0(Config, t7()),
+    ok = routing_test0(Config, t8()),
+    ok = routing_test0(Config, t9()),
+    ok = routing_test0(Config, t10()),
+    ok = routing_test0(Config, t11()),
+    ok = routing_test0(Config, t12()),
+
+    passed.
 
 t1() ->
     {[<<"a0.b0.c0.d0">>, <<"a1.b1.c1.d1">>], %% binding keys
@@ -100,10 +147,9 @@ t12() ->
     [<<"*.*.*.*.*.pdfToolbox">>],
     0}.
 
-test0({Queues, Publishes, Count}) ->
+routing_test0(Config, {Queues, Publishes, Count}) ->
     Msg = #amqp_msg{props = #'P_basic'{}, payload = <<>>},
-    {ok, Conn} = amqp_connection:start(#amqp_params_network{}),
-    {ok, Chan} = amqp_connection:open_channel(Conn),
+    Chan = rabbit_ct_client_helpers:open_channel(Config, 0),
     #'exchange.declare_ok'{} =
         amqp_channel:call(Chan,
                           #'exchange.declare' {
@@ -136,14 +182,15 @@ test0({Queues, Publishes, Count}) ->
     Count = lists:sum(Counts),
     amqp_channel:call(Chan, #'exchange.delete' { exchange = <<"rtopic">> }),
     [amqp_channel:call(Chan, #'queue.delete' { queue = Q }) || Q <- Queues],
-    amqp_channel:close(Chan),
-    amqp_connection:close(Conn),
+
+    rabbit_ct_client_helpers:close_channel(Chan),
+
     ok.
 
-unbind_test() ->
-    ok = test1(u1()),
-    ok = test1(u2()),
-    ok = test1(u3()).
+unbind_test(Config) ->
+    ok = unbind_test0(Config, u1()),
+    ok = unbind_test0(Config, u2()),
+    ok = unbind_test0(Config, u3()).
 
 u1() ->
     {[<<"a0.b0.c0.d0">>, <<"a0.b0.c0.d1">>, <<"a0.b0.c0.d2">>, <<"a0.b0.c0">>],
@@ -167,10 +214,9 @@ u3() ->
     [<<"a0.b1.c1.d0">>],
     1}.
 
-test1({Queues, Publishes, Unbinds, Count}) ->
+unbind_test0(Config, {Queues, Publishes, Unbinds, Count}) ->
     Msg = #amqp_msg{props = #'P_basic'{}, payload = <<>>},
-    {ok, Conn} = amqp_connection:start(#amqp_params_network{}),
-    {ok, Chan} = amqp_connection:open_channel(Conn),
+    Chan = rabbit_ct_client_helpers:open_channel(Config, 0),
     #'exchange.declare_ok'{} =
         amqp_channel:call(Chan,
                           #'exchange.declare' {
@@ -209,13 +255,6 @@ test1({Queues, Publishes, Unbinds, Count}) ->
     Count = lists:sum(Counts),
     amqp_channel:call(Chan, #'exchange.delete' { exchange = <<"rtopic">> }),
     [amqp_channel:call(Chan, #'queue.delete' { queue = Q }) || Q <- Queues],
-    amqp_channel:close(Chan),
-    amqp_connection:close(Conn),
+
+    rabbit_ct_client_helpers:close_channel(Chan),
     ok.
-
-
-tests(Module, Timeout) ->
-    {foreach, fun() -> ok end,
-     [{timeout, Timeout, fun () -> Module:F() end} ||
-         {F, _Arity} <- proplists:get_value(exports, Module:module_info()),
-         string:right(atom_to_list(F), 5) =:= "_test"]}.
