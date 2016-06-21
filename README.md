@@ -68,7 +68,7 @@ Then clone this repository inside your umbrella folder and run make:
 
 ```bash
 cd umbrella-folder
-git clone https://github.com/videlalvaro/rabbitmq-rtopic-exchange.git
+git clone https://github.com/rabbitmq/rabbitmq-rtopic-exchange.git
 cd rabbitmq-rtopic-exchange
 make
 ```
