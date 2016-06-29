@@ -9,5 +9,6 @@ erl_crash.dump
 /ebin/
 /logs/
 /plugins/
+/xrefr
 
 /rabbitmq_rtopic_exchange.d
