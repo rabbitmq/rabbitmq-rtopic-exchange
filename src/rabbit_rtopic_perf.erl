@@ -122,14 +122,14 @@ queue_name(L) ->
     list_to_binary(random_string(L, false)).
 
 random_length_queue_name(L) ->
-    L1 = random:uniform(L),
+    L1 = rand_compat:uniform(L),
     list_to_binary(random_string(L1, false)).
 
 routing_key(L) ->
     list_to_binary(random_string(L, true)).
 
 rand_routing_key(L) ->
-    L1 = random:uniform(L),
+    L1 = rand_compat:uniform(L),
     list_to_binary(random_string(L1, true)).
 
 do_n(Fun, Arg, N) ->
@@ -141,11 +141,11 @@ do_n(Fun, Arg, Count, N, Acc) ->
     do_n(Fun, Arg, Count+1, N, [Fun(Arg) | Acc]).
 
 random_string(0, _Wild) -> [];
-random_string(1 = Length, Wild) -> [random_char(random:uniform(30), Wild) | random_string(Length-1, Wild)];
-random_string(Length, Wild) -> [random_char(random:uniform(30), Wild), 46 | random_string(Length-1, Wild)].
+random_string(1 = Length, Wild) -> [random_char(rand_compat:uniform(30), Wild) | random_string(Length-1, Wild)];
+random_string(Length, Wild) -> [random_char(rand_compat:uniform(30), Wild), 46 | random_string(Length-1, Wild)].
 random_char(1, true) -> 42;
 random_char(2, true) -> 35;
-random_char(_N, _) -> random:uniform(25) + 97.
+random_char(_N, _) -> rand_compat:uniform(25) + 97.
 
 exchange(XBin) ->
     #exchange{name        = #resource{virtual_host = <<"/">>, kind = exchange, name = XBin},
