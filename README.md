@@ -49,43 +49,27 @@ basic_publish(Msg, "rtopic", "server1.app1.#").
 
 The exchange type used when declaring an exchange is `x-rtopic`.
 
-## Installing the plugin ##
+## Installation and Binary Builds
 
-Install the corresponding .ez files from our
-[Community Plugins page](http://www.rabbitmq.com/community-plugins.html).
+This plugin is now available from the [RabbitMQ community plugins page](http://www.rabbitmq.com/community-plugins.html).
+Please consult the docs on [how to install RabbitMQ plugins](http://www.rabbitmq.com/plugins.html#installing-plugins).
 
 Then enable the plugin:
 
 ```bash
-./sbin/rabbitmq-plugins enable rabbitmq_rtopic_exchange
+rabbitmq-plugins enable rabbitmq_rtopic_exchange
 ```
 
-### Building the Plugin ###
+## Building from Source
 
-To build the exchange follow the instructions here [Plugin Development Guide](http://www.rabbitmq.com/plugin-development.html) to prepare the RabbitMQ Umbrella.
+See [Plugin Development guide](http://www.rabbitmq.com/plugin-development.html).
 
-Then clone this repository inside your umbrella folder and run make:
+TL;DR: running
 
-```bash
-cd umbrella-folder
-git clone https://github.com/rabbitmq/rabbitmq-rtopic-exchange.git
-cd rabbitmq-rtopic-exchange
-make
-```
+    make dist
 
-Then inside the `dist` folder you will have the following files:
+will build the plugin and put build artifacts under the `./plugins` directory.
 
-```bash
-amqp_client-0.0.0.ez
-rabbit_common-0.0.0.ez
-rabbitmq_rtopic_exchange-0.0.0.ez
-```
-
-Copy them all into your broker plugins folder except for `rabbit_common-*.ez`. Then enable the plugin by using the `rabbitmq-plugins` script:
-
-```bash
-./sbin/rabbitmq-plugins enable rabbitmq_rtopic_exchange
-```
 
 ## Examples and Tests ##
 
