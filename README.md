@@ -71,11 +71,11 @@ TL;DR: running
 will build the plugin and put build artifacts under the `./plugins` directory.
 
 
-## Examples and Tests ##
+## Examples and Tests
 
-There's a few tests inside the test folder. You can take a look there if you want to see some examples on how to use the plugin.
+To run the tests use `make tests`.
 
-To run the tests call `make test`.
+The test suite can also be used for code examples.
 
 ## Performance ##
 
@@ -104,10 +104,12 @@ On the other hand if we publish a message with the routing key `"#.d0"`, it's th
 
 If you have the needs for routing `"a0.#.c0.d0.#.f0.#"` then again, with a small amount of binding keys it should be a problem, but keep in mind that the longer the gaps represented by the `#` character, the slower the algorithm will run. AFAIK there's no easy solution for this problem.
 
-## License ##
+## License
 
 See LICENSE.
 
-## Credits ##
+## Copyright
 
-Alvaro Videla - alvaro@rabbitmq.com
+(c) Pivotal Software Inc., 2007-2016.
+
+Originally developed by Alvaro Videla.
