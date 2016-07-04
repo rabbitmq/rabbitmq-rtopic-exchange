@@ -1,6 +1,5 @@
 -module(rabbit_rtopic_perf).
-
--compile(export_all).
+adsf
 
 -include_lib("amqp_client/include/amqp_client.hrl").
 
