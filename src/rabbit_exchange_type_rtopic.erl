@@ -19,7 +19,7 @@
 %% That means there's a lot of duplicated code. Perhaps trie creation could 
 %% be extracted into its own module to prevent.
 
--module(rabbit_exchange_type_rtopic).
+
 
 -include_lib("rabbit_common/include/rabbit.hrl").
 
