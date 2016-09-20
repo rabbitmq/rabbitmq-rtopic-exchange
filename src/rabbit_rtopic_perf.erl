@@ -2,7 +2,8 @@
 
 -compile(export_all).
 
--include_lib("amqp_client/include/amqp_client.hrl").
+-include_lib("rabbit_common/include/rabbit.hrl").
+-include_lib("rabbit_common/include/rabbit_framing.hrl").
 
 -define(QUEUE_FILE, "/tmp/queues").
 -define(RKEYS_FILE, "/tmp/rkeys").
