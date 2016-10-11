@@ -1,6 +1,5 @@
 -module(rabbit_rtopic_perf).
-
--compile(export_all).
+adsf
 
 -include_lib("rabbit_common/include/rabbit.hrl").
 -include_lib("rabbit_common/include/rabbit_framing.hrl").
