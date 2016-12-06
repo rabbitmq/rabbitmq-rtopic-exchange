@@ -1,7 +1,0 @@
-{application, rabbitmq_rtopic_exchange,
- [{description, "Reverse Topic Exchange Type"},
-  {vsn, ""},
-  {modules, []},
-  {registered, []},
-  {env, []},
-  {applications, [kernel, stdlib, rabbit_common, rabbit]}]}.
