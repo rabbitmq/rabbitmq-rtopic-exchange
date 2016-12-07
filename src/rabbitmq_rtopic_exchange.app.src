@@ -1,8 +1,0 @@
-{application, rabbitmq_rtopic_exchange,
- [{description, "Reverse Topic Exchange Type"},
-  {vsn, ""},
-  {modules, []},
-  {registered, []},
-  {env, []},
-  {broker_version_requirements, ["3.6.0", "3.7.0"]},
-  {applications, [kernel, stdlib, rabbit_common, rabbit]}]}.
