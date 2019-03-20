@@ -1,6 +1,6 @@
 # RabbitMQ Reverse Topic Exchange Type #
 
-This plugin adds a __reverse topic exchange__ type to [RabbitMQ](http://www.rabbitmq.com). The exchange type is `x-rtopic`.
+This plugin adds a __reverse topic exchange__ type to [RabbitMQ](https://www.rabbitmq.com). The exchange type is `x-rtopic`.
 
 The idea is to be able to specify routing patterns when publishing messages. With the default topic exchange patterns are only accepted when binding queues to exchanges.
 
@@ -51,8 +51,8 @@ The exchange type used when declaring an exchange is `x-rtopic`.
 
 ## Installation and Binary Builds
 
-This plugin is now available from the [RabbitMQ community plugins page](http://www.rabbitmq.com/community-plugins.html).
-Please consult the docs on [how to install RabbitMQ plugins](http://www.rabbitmq.com/plugins.html#installing-plugins).
+This plugin is now available from the [RabbitMQ community plugins page](https://www.rabbitmq.com/community-plugins.html).
+Please consult the docs on [how to install RabbitMQ plugins](https://www.rabbitmq.com/plugins.html#installing-plugins).
 
 Then enable the plugin:
 
@@ -62,7 +62,7 @@ rabbitmq-plugins enable rabbitmq_rtopic_exchange
 
 ## Building from Source
 
-See [Plugin Development guide](http://www.rabbitmq.com/plugin-development.html).
+See [Plugin Development guide](https://www.rabbitmq.com/plugin-development.html).
 
 TL;DR: running
 
