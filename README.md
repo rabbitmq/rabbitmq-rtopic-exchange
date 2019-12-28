@@ -110,6 +110,6 @@ See LICENSE.
 
 ## Copyright
 
-(c) Pivotal Software Inc., 2007-2016.
+(c) Pivotal Software Inc., 2007-2020.
 
 Originally developed by Alvaro Videla.
