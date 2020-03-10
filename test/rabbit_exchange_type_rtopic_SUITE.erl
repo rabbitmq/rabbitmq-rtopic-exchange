@@ -11,7 +11,7 @@
 %% The Original Code is RabbitMQ Reverse Topic Exchange.
 %%
 %% The Initial Developer of the Original Code is GoPivotal, Inc.
-%% Copyright (c) 2011-2013 GoPivotal, Inc.  All rights reserved.
+%% Copyright (c) 2011-2020 VMware, Inc. or its affiliates.  All rights reserved.
 %%
 
 -module(rabbit_exchange_type_rtopic_SUITE).
