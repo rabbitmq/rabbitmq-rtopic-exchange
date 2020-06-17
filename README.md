@@ -110,6 +110,6 @@ See LICENSE.
 
 ## Copyright
 
-(c) Pivotal Software Inc., 2007-2020.
+(c) 2007-2020 VMware, Inc. or its affiliates.
 
 Originally developed by Alvaro Videla.
