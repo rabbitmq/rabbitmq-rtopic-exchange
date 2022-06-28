@@ -1,9 +1,9 @@
 PROJECT = rabbitmq_rtopic_exchange
 PROJECT_DESCRIPTION = Reverse Topic Exchange Type
-RABBITMQ_VERSION ?= v3.9.x
+RABBITMQ_VERSION ?= v3.10.x
 
 define PROJECT_APP_EXTRA_KEYS
-	{broker_version_requirements, ["3.9.0"]}
+	{broker_version_requirements, ["3.10.0"]}
 endef
 
 DEPS = rabbit_common rabbit
