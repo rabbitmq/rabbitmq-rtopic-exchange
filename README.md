@@ -110,6 +110,6 @@ See LICENSE.
 
 ## Copyright
 
-(c) 2007-2020 VMware, Inc. or its affiliates.
+(c) 2007-2022 VMware, Inc. or its affiliates.
 
-Originally developed by Alvaro Videla.
+Originally developed by Álvaro Videla.
