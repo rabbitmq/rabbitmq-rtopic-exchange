@@ -18,7 +18,7 @@
 
 -export([description/0, serialise_events/0, route/2]).
 -export([validate/1, validate_binding/2,
-         create/2, delete/3, policy_changed/2, add_binding/3,
+         create/2, delete/2, policy_changed/2, add_binding/3,
          remove_bindings/3, assert_args_equivalence/2]).
 -export([init/0]).
 -export([info/1, info/2]).
@@ -67,41 +67,50 @@ route(#exchange{name = X},
 
 validate(_X) -> ok.
 validate_binding(_X, _B) -> ok.
-create(_Tx, _X) -> ok.
+create(_Serial, _X) -> ok.
 
-delete(transaction, #exchange{name = X}, _Bs) ->
-    trie_remove_all_nodes(X),
-    trie_remove_all_edges(X),
-    trie_remove_all_bindings(X),
+delete(none, #exchange{name = X}) ->
+    rabbit_mnesia:execute_mnesia_transaction(
+      fun() ->
+              trie_remove_all_nodes(X),
+              trie_remove_all_edges(X),
+              trie_remove_all_bindings(X)
+      end),
     ok;
-delete(none, _Exchange, _Bs) ->
+delete(_Serial, _X) ->
     ok.
 
 policy_changed(_X1, _X2) -> ok.
 
-add_binding(transaction, _Exchange, Binding) ->
-    internal_add_binding(Binding);
-add_binding(none, _Exchange, _Binding) ->
+add_binding(none, _Exchange, Binding) ->
+    rabbit_mnesia:execute_mnesia_transaction(
+      fun() ->
+              internal_add_binding(Binding)
+      end);
+add_binding(_Serial, _Exchange, _Binding) ->
     ok.
 
-remove_bindings(transaction, _X, Bs) ->
-    %% See rabbit_binding:lock_route_tables for the rationale for
-    %% taking table locks.
-    _ = case Bs of
-            [_] -> ok;
-            _   -> [mnesia:lock({table, T}, write) ||
-                       T <- [rabbit_rtopic_trie_node,
-                             rabbit_rtopic_trie_edge,
-                             rabbit_rtopic_trie_binding]]
-        end,
-    [begin
-         Path = [{FinalNode, _} | _] =
-             follow_down_get_path(X, split_topic_key(K)),
-         trie_remove_binding(X, FinalNode, D),
-         remove_path_if_empty(X, Path)
-     end ||  #binding{source = X, key = K, destination = D} <- Bs],
+remove_bindings(none, _X, Bs) ->
+    rabbit_mnesia:execute_mnesia_transaction(
+      fun() ->
+              %% See rabbit_binding:lock_route_tables for the rationale for
+              %% taking table locks.
+              _ = case Bs of
+                      [_] -> ok;
+                      _   -> [mnesia:lock({table, T}, write) ||
+                              T <- [rabbit_rtopic_trie_node,
+                                    rabbit_rtopic_trie_edge,
+                                    rabbit_rtopic_trie_binding]]
+                  end,
+              [begin
+                   Path = [{FinalNode, _} | _] =
+                   follow_down_get_path(X, split_topic_key(K)),
+                   trie_remove_binding(X, FinalNode, D),
+                   remove_path_if_empty(X, Path)
+               end ||  #binding{source = X, key = K, destination = D} <- Bs]
+      end),
     ok;
-remove_bindings(none, _X, _Bs) ->
+remove_bindings(_Serial, _X, _Bs) ->
     ok.
 
 assert_args_equivalence(X, Args) ->
