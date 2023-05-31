@@ -49,6 +49,14 @@ basic_publish(Msg, "rtopic", "server1.app1.#").
 
 The exchange type used when declaring an exchange is `x-rtopic`.
 
+## Supported RabbitMQ Versions
+
+The most recent release of this plugin targets RabbitMQ 3.12.x.
+
+## Supported Erlang/OTP Versions
+
+This plugin [requires Erlang 25.0 or later versions](https://www.rabbitmq.com/which-erlang.html), same as RabbitMQ 3.12.x.
+
 ## Installation and Binary Builds
 
 This plugin is now available from the [RabbitMQ community plugins page](https://www.rabbitmq.com/community-plugins.html).
