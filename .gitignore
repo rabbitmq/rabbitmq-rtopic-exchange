@@ -16,3 +16,8 @@ logs/
 plugins/
 sbin/
 tmp/
+
+/user.bazelrc
+/bazel-*
+
+/.vscode/

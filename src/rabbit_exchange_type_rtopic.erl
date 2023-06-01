@@ -87,13 +87,13 @@ add_binding(none, _Exchange, _Binding) ->
 remove_bindings(transaction, _X, Bs) ->
     %% See rabbit_binding:lock_route_tables for the rationale for
     %% taking table locks.
-    case Bs of
-        [_] -> ok;
-        _   -> [mnesia:lock({table, T}, write) ||
-                   T <- [rabbit_rtopic_trie_node,
-                         rabbit_rtopic_trie_edge,
-                         rabbit_rtopic_trie_binding]]
-    end,
+    _ = case Bs of
+            [_] -> ok;
+            _   -> [mnesia:lock({table, T}, write) ||
+                       T <- [rabbit_rtopic_trie_node,
+                             rabbit_rtopic_trie_edge,
+                             rabbit_rtopic_trie_binding]]
+        end,
     [begin
          Path = [{FinalNode, _} | _] =
              follow_down_get_path(X, split_topic_key(K)),
@@ -345,11 +345,11 @@ init() ->
      [{record_name, rtopic_trie_binding},
       {attributes, record_info(fields, rtopic_trie_binding)},
       {type, ordered_set}]}],
-    [begin
-        mnesia:create_table(Table, Attrs),
-        mnesia:add_table_copy(Table, node(), ram_copies)
-     end || {Table, Attrs} <- Tables],
+    _ = [begin
+            _ = mnesia:create_table(Table, Attrs),
+            mnesia:add_table_copy(Table, node(), ram_copies)
+         end || {Table, Attrs} <- Tables],
     
     TNames = [T || {T, _} <- Tables],
-    mnesia:wait_for_tables(TNames, 30000),
+    _ = mnesia:wait_for_tables(TNames, 30000),
     ok.
