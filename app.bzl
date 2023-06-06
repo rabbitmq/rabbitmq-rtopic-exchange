@@ -35,7 +35,7 @@ def all_beam_files(name = "all_beam_files"):
         app_name = "rabbitmq_rtopic_exchange",
         dest = "ebin",
         erlc_opts = "//:erlc_opts",
-        deps = ["@rabbitmq-server//deps/rabbit_common:erlang_app"],
+        deps = ["@rabbitmq-server//deps/rabbit:erlang_app", "@rabbitmq-server//deps/rabbit_common:erlang_app"],
     )
     filegroup(
         name = "beam_files",
@@ -51,7 +51,7 @@ def all_test_beam_files(name = "all_test_beam_files"):
         app_name = "rabbitmq_rtopic_exchange",
         dest = "test",
         erlc_opts = "//:test_erlc_opts",
-        deps = ["@rabbitmq-server//deps/rabbit_common:erlang_app"],
+        deps = ["@rabbitmq-server//deps/rabbit:erlang_app", "@rabbitmq-server//deps/rabbit_common:erlang_app"],
     )
     filegroup(
         name = "test_beam_files",
