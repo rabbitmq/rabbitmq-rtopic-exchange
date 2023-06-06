@@ -112,6 +112,14 @@ On the other hand if we publish a message with the routing key `"#.d0"`, it's th
 
 If you have the needs for routing `"a0.#.c0.d0.#.f0.#"` then again, with a small amount of binding keys it should be a problem, but keep in mind that the longer the gaps represented by the `#` character, the slower the algorithm will run. AFAIK there's no easy solution for this problem.
 
+## Creating a Release
+
+1. Update `broker_version_requirements` in `helpers.bzl` & `Makefile` (Optional)
+1. Update the plugin version in `MODULE.bazel`
+1. Push a tag (i.e. `v3.12.0`) with the matching version
+1. Allow the Release workflow to run and create a draft release
+1. Review and publish the release
+
 ## License
 
 See LICENSE.
