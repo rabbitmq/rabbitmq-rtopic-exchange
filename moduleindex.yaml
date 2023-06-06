@@ -381,8 +381,6 @@ rabbit_common:
 - worker_pool
 - worker_pool_sup
 - worker_pool_worker
-rabbitmq-rtopic-exchange:
-- rabbit_exchange_type_rtopic
 rabbitmq_prelaunch:
 - rabbit_boot_state
 - rabbit_boot_state_sup
@@ -402,6 +400,8 @@ rabbitmq_prelaunch:
 - rabbit_prelaunch_file
 - rabbit_prelaunch_sighandler
 - rabbit_prelaunch_sup
+rabbitmq_rtopic_exchange:
+- rabbit_exchange_type_rtopic
 ranch:
 - ranch
 - ranch_acceptor
