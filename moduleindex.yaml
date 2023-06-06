@@ -402,6 +402,8 @@ rabbitmq_prelaunch:
 - rabbit_prelaunch_file
 - rabbit_prelaunch_sighandler
 - rabbit_prelaunch_sup
+rabbitmq_rtopic_exchange:
+- rabbit_exchange_type_rtopic
 ranch:
 - ranch
 - ranch_acceptor

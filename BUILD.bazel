@@ -36,6 +36,8 @@ gazelle(
     name = "gazelle",
     data = GAZELLE_ERLANG_RUNTIME_DEPS,
     extra_args = [
+        "--app_name",
+        module_name(),
         "--verbose",
     ],
     gazelle = "@rules_erlang//gazelle:gazelle_erlang_binary",
@@ -110,7 +112,7 @@ erlang_app(
 )
 
 alias(
-    name = "rabbitmq-rtopic-exchange",
+    name = "rabbitmq_rtopic_exchange",
     actual = ":erlang_app",
     visibility = ["//visibility:public"],
 )
