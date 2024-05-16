@@ -51,11 +51,13 @@ The exchange type used when declaring an exchange is `x-rtopic`.
 
 ## Supported RabbitMQ Versions
 
-The most recent release of this plugin targets RabbitMQ 3.12.x.
+The most recent release of this plugin targets RabbitMQ 3.13.x.
+
+This plugin requires Mnesia and does not work with Khepri!
 
 ## Supported Erlang/OTP Versions
 
-This plugin [requires Erlang 25.0 or later versions](https://www.rabbitmq.com/which-erlang.html), same as RabbitMQ 3.12.x.
+This plugin [requires Erlang 26.0 or later versions](https://www.rabbitmq.com/which-erlang.html), same as RabbitMQ 3.13.x.
 
 ## Installation and Binary Builds
 
@@ -116,7 +118,7 @@ If you have the needs for routing `"a0.#.c0.d0.#.f0.#"` then again, with a small
 
 1. Update `broker_version_requirements` in `helpers.bzl` & `Makefile` (Optional)
 1. Update the plugin version in `MODULE.bazel`
-1. Push a tag (i.e. `v3.12.0`) with the matching version
+1. Push a tag (i.e. `v3.13.0`) with the matching version
 1. Allow the Release workflow to run and create a draft release
 1. Review and publish the release
 
