@@ -16,7 +16,7 @@
 
 -behaviour(rabbit_exchange_type).
 
--export([description/0, serialise_events/0, route/2]).
+-export([description/0, serialise_events/0, route/3]).
 -export([validate/1, validate_binding/2,
          create/2, delete/2, policy_changed/2, add_binding/3,
          remove_bindings/3, assert_args_equivalence/2]).
@@ -58,8 +58,8 @@ description() ->
 serialise_events() -> false.
 
 %% NB: This may return duplicate results in some situations (that's ok)
-route(#exchange{name = X},
-      #delivery{message = #basic_message{routing_keys = Routes}}) ->
+route(#exchange{name = X}, Msg, _Opts) ->
+    Routes = mc:routing_keys(Msg),
     lists:append([begin
                       Words = split_topic_key(RKey),
                       mnesia:async_dirty(fun trie_match/2, [X, Words])
