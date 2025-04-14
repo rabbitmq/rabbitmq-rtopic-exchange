@@ -2,11 +2,11 @@ PROJECT = rabbitmq_rtopic_exchange
 PROJECT_DESCRIPTION = Reverse Topic Exchange Type
 PROJECT_VERSION=4.0.9
 
-RABBITMQ_VERSION ?= v4.0.x
+RABBITMQ_VERSION ?= v4.0.9
 current_rmq_ref = $(RABBITMQ_VERSION)
 
 define PROJECT_APP_EXTRA_KEYS
-	{broker_version_requirements, ["4.0.8"]}
+	{broker_version_requirements, ["4.0.0"]}
 endef
 
 dep_amqp_client                = git_rmq-subfolder rabbitmq-erlang-client $(RABBITMQ_VERSION)

@@ -128,6 +128,6 @@ See LICENSE.
 
 ## Copyright
 
-(c) 2007-2022 VMware, Inc. or its affiliates.
+Copyright (c) 2007-2025 Broadcom, Inc. or its affiliates. All rights reserved.
 
 Originally developed by Álvaro Videla.
