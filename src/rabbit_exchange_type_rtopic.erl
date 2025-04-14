@@ -27,7 +27,7 @@
                    [{description, "exchange type rtopic"},
                     {mfa,         {rabbit_registry, register,
                                    [exchange, <<"x-rtopic">>, ?MODULE]}},
-                    {requires,    rabbit_registry}]}).
+                    {requires,    database}]}).
 
 -rabbit_boot_step(
    {rabbit_exchange_type_rtopic_mnesia,
