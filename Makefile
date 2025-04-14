@@ -1,6 +1,5 @@
 PROJECT = rabbitmq_rtopic_exchange
 PROJECT_DESCRIPTION = Reverse Topic Exchange Type
-PROJECT_MOD = rabbit_exchange_type_rtopic
 
 RABBITMQ_VERSION ?= v4.0.x
 current_rmq_ref = $(RABBITMQ_VERSION)

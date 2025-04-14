@@ -7,7 +7,7 @@
 
 %% NOTE: This plugin is compltetely based on the rabbitmq topic exchange
 %% what changes is the routing algorithm.
-%% That means there's a lot of duplicated code. Perhaps trie creation could 
+%% That means there's a lot of duplicated code. Perhaps trie creation could
 %% be extracted into its own module to prevent.
 
 -module(rabbit_exchange_type_rtopic).
@@ -27,15 +27,13 @@
                    [{description, "exchange type rtopic"},
                     {mfa,         {rabbit_registry, register,
                                    [exchange, <<"x-rtopic">>, ?MODULE]}},
-                    {requires,    rabbit_registry},
-                    {enables,     kernel_ready}]}).
+                    {requires,    rabbit_registry}]}).
 
 -rabbit_boot_step(
    {rabbit_exchange_type_rtopic_mnesia,
     [{description, "exchange type x-rtopic: mnesia"},
      {mfa,         {?MODULE, init, []}},
-     {requires,    database},
-     {enables,     external_infrastructure}]}).
+     {requires,    pre_flight}]}).
 
 -record(rtopic_trie_node, {trie_node, edge_count, binding_count}).
 -record(rtopic_trie_edge, {trie_edge, node_id}).
@@ -129,7 +127,7 @@ trie_match(X, Words) ->
 trie_match(X, Node, [], ResAcc) ->
     trie_bindings(X, Node) ++ ResAcc;
 trie_match(X, Node, ["#"], ResAcc) ->
-    %% "#" is the last word in the pattern. 
+    %% "#" is the last word in the pattern.
     %% Get current node and all "down nodes" bindings.
     collect_down_bindings(X, Node, trie_bindings(X, Node) ++ ResAcc);
 trie_match(X, Node, ["#" | RestW], ResAcc) ->
@@ -172,7 +170,7 @@ collect_with_hash(X, Node, [W|_Tail] = RestW, ResAcc) ->
 follow_down_create(X, Words) ->
     case follow_down_last_node(X, Words) of
         {ok, FinalNode}      -> FinalNode;
-        {error, Node, RestW} -> 
+        {error, Node, RestW} ->
             lists:foldl(
                 fun (W, CurNode) ->
                     NewNode = new_node_id(),
@@ -341,7 +339,7 @@ split_topic_key(<<C:8, Rest/binary>>, RevWordAcc, RevResAcc) ->
 %%----------------------------------------------------------------------------
 
 init() ->
-    Tables = 
+    Tables =
     [{rabbit_rtopic_trie_node,
      [{record_name, rtopic_trie_node},
       {attributes, record_info(fields, rtopic_trie_node)},
@@ -358,7 +356,7 @@ init() ->
             _ = mnesia:create_table(Table, Attrs),
             mnesia:add_table_copy(Table, node(), ram_copies)
          end || {Table, Attrs} <- Tables],
-    
+
     TNames = [T || {T, _} <- Tables],
     _ = mnesia:wait_for_tables(TNames, 30000),
     ok.
