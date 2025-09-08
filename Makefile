@@ -1,8 +1,8 @@
 PROJECT = rabbitmq_rtopic_exchange
 PROJECT_DESCRIPTION = Reverse Topic Exchange Type
-PROJECT_VERSION=4.1.0
+PROJECT_VERSION=4.1.4
 
-RABBITMQ_VERSION ?= 4.1.0
+RABBITMQ_VERSION ?= 4.1.4
 current_rmq_ref = $(RABBITMQ_VERSION)
 
 define PROJECT_APP_EXTRA_KEYS
