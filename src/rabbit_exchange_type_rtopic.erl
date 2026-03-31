@@ -2,7 +2,7 @@
 %% License, v. 2.0. If a copy of the MPL was not distributed with this
 %% file, You can obtain one at https://mozilla.org/MPL/2.0/.
 %%
-%% Copyright (c) 2007-2025 Broadcom, Inc. or its affiliates. All rights reserved.
+%% Copyright (c) 2007-2026 Broadcom. All Rights Reserved. The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries. All rights reserved.
 %%
 
 %% NOTE: This plugin is compltetely based on the rabbitmq topic exchange
@@ -23,17 +23,22 @@
 -export([init/0]).
 -export([info/1, info/2]).
 
--rabbit_boot_step({?MODULE,
-                   [{description, "exchange type rtopic"},
-                    {mfa,         {rabbit_registry, register,
-                                   [exchange, <<"x-rtopic">>, ?MODULE]}},
-                    {requires,    database}]}).
+-rabbit_boot_step(
+   {rabbit_exchange_type_rtopic_registry,
+    [{description, "exchange type x-rtopic: registry"},
+     {mfa,         {rabbit_registry, register,
+                    [exchange, <<"x-rtopic">>, ?MODULE]}},
+     {requires,    rabbit_registry},
+     {enables,     kernel_ready},
+     {cleanup,     {rabbit_registry, unregister,
+                    [exchange, <<"x-rtopic">>]}}]}).
 
 -rabbit_boot_step(
    {rabbit_exchange_type_rtopic_mnesia,
     [{description, "exchange type x-rtopic: mnesia"},
      {mfa,         {?MODULE, init, []}},
-     {requires,    pre_flight}]}).
+     {requires,    database},
+     {enables,     external_infrastructure}]}).
 
 -record(rtopic_trie_node, {trie_node, edge_count, binding_count}).
 -record(rtopic_trie_edge, {trie_edge, node_id}).

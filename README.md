@@ -51,18 +51,18 @@ The exchange type used when declaring an exchange is `x-rtopic`.
 
 ## Supported RabbitMQ Versions
 
-The most recent release of this plugin targets RabbitMQ 3.13.x.
+This plugin targets RabbitMQ 4.2+.
 
 This plugin requires Mnesia and does not work with Khepri!
 
 ## Supported Erlang/OTP Versions
 
-This plugin [requires Erlang 26.0 or later versions](https://www.rabbitmq.com/which-erlang.html), same as RabbitMQ 3.13.x.
+This plugin [requires Erlang 27.x](https://www.rabbitmq.com/docs/which-erlang), same as RabbitMQ 4.2.x.
 
-## Installation and Binary Builds
+## Installation
 
-This plugin is now available from the [RabbitMQ community plugins page](https://www.rabbitmq.com/community-plugins.html).
-Please consult the docs on [how to install RabbitMQ plugins](https://www.rabbitmq.com/plugins.html#installing-plugins).
+This plugin is available from the [RabbitMQ community plugins page](https://www.rabbitmq.com/community-plugins.html).
+Please consult the docs on [how to install RabbitMQ plugins](https://www.rabbitmq.com/docs/plugins#installing-plugins).
 
 Then enable the plugin:
 
@@ -72,7 +72,7 @@ rabbitmq-plugins enable rabbitmq_rtopic_exchange
 
 ## Building from Source
 
-See [Plugin Development guide](https://www.rabbitmq.com/plugin-development.html).
+See [Plugin Development guide](https://www.rabbitmq.com/docs/plugin-development).
 
 TL;DR: running
 
@@ -114,20 +114,12 @@ On the other hand if we publish a message with the routing key `"#.d0"`, it's th
 
 If you have the needs for routing `"a0.#.c0.d0.#.f0.#"` then again, with a small amount of binding keys it should be a problem, but keep in mind that the longer the gaps represented by the `#` character, the slower the algorithm will run. AFAIK there's no easy solution for this problem.
 
-## Creating a Release
-
-1. Update `broker_version_requirements` in `helpers.bzl` & `Makefile` (Optional)
-1. Update the plugin version in `MODULE.bazel`
-1. Push a tag (i.e. `v3.13.0`) with the matching version
-1. Allow the Release workflow to run and create a draft release
-1. Review and publish the release
-
 ## License
 
 See LICENSE.
 
 ## Copyright
 
-Copyright (c) 2007-2025 Broadcom, Inc. or its affiliates. All rights reserved.
+Copyright (c) 2007-2026 Broadcom. All Rights Reserved. The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries. All rights reserved.
 
 Originally developed by Álvaro Videla.
